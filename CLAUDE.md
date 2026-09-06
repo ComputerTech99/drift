@@ -54,7 +54,45 @@ The honest gap is the point.
 | `unverified` | no assertion type fits |
 
 `dropped` carries the turn index where the symbol last appeared. Every verdict
-carries `evidence`, currently always `"tool_calls"`. Keep the field.
+carries an `evidence` string describing the specific check that ran.
+
+Every verdict also carries `evidence_class`: `confirmed_structural` for a
+direct graph relation lookup (`symbol_exists`, `has_inbound_edge`, `calls`),
+`heuristic` for anything that reads source text or a file path to infer intent
+(`literal_in_body`'s regex, `test_references`'s test-path pattern, and any
+`dropped` verdict's textual turn attribution), and `requires_verification` for
+`unverified` or an evaluator with nothing to check. This is set by which
+evaluator produced the verdict, never by whether it passed — a heuristic that
+happens to be right is still tiered `heuristic`. See Track 1 below: tiering
+communicates how much to trust a *correctly targeted* check, not whether
+extraction targeted the right thing.
+
+## Track 1: privacy boundary
+
+Two assumptions the original design made are false and must not come back:
+
+1. That a transcript could be shipped wholesale to a hosted model for
+   extraction. It never was — `extract_requirements` only ever receives
+   user-prompt turns, never assistant text or `tool_use` payloads — but even
+   that narrower slice must not leave the machine by default.
+2. That all verdicts carry equal epistemic weight. They do not: a graph
+   relation lookup and a regex-over-source-text heuristic are different kinds
+   of evidence, and presenting them identically overstates the heuristic ones.
+   See `evidence_class` above.
+
+Consequences, both enforced in code, not just documented:
+
+- `--backend local` (Ollama, `http://localhost`) is the default and sends
+  nothing off-machine. `--backend api` additionally requires `--allow-external`
+  and prints a warning naming the destination and model before the call. One
+  could argue Anthropic isn't a *new* external party for a transcript that
+  Claude Code itself authored — but this tool does not rely on that argument by
+  default; the user opts in explicitly, every invocation.
+- Redacted or missing transcript/graph fields must degrade, not crash or
+  silently drop a requirement. A nulled field yields a row with a reduced
+  `evidence_class`, or a `False`/`None` evaluator result, never an exception
+  and never a vanished row. See `test_drift.py` for the redacted/missing-field
+  cases this is tested against.
 
 ## Out of scope
 
@@ -100,6 +138,18 @@ flags do not exist.
   one-sentence prompt.
 - Parse the real ndjson field names. Do not assume a schema.
 - Exit non-zero if any verdict is `absent` or `dropped`.
+- `--backend api` requires `--allow-external`; `--backend local` needs nothing
+  extra and is the default. See Track 1 above.
+- A `dropped`/`absent` on a symbol that plainly exists (e.g. a constructor
+  parameter or attribute like `timeout`) is usually an extraction-assertion
+  mismatch, not an evaluator bug: this graph only exposes functions/classes/
+  methods as symbols for most languages, not parameters or attributes, so
+  naming one in `symbol_exists` is structurally unwinnable. Fix the extraction
+  prompt's definition of "symbol"; do not patch the evaluator to guess harder,
+  and do not use `evidence_class` to paper over a mistargeted assertion.
+- Tests: `python -m unittest test_drift`. Stdlib only; `requests.post` and
+  `run_entire`/`extract_requirements` are mocked so nothing touches a network
+  or shells out to `entire`.
 
 ## Working style
 
