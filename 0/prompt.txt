@@ -1,0 +1,35 @@
+Reconstruct context from the pre-curveball Checkpoint before doing anything. Read it and tell me what you understand about the architecture, completed work, and open risks. Do not read the source first.
+
+Then, before editing any code, run Entire Graph impact analysis on the areas a privacy constraint would touch — the extraction backend, the transcript parser, and the verdict/evidence path. Show me the output. Capture it; graph use after implementation scores partial.
+
+The constraint (Track 1, Privacy Boundary):
+
+Raw prompts and transcripts must not be sent to a new external service.
+The product must stay useful when sensitive fields are redacted or unavailable.
+Users must be able to distinguish confirmed structural evidence, heuristic or incomplete evidence, and claims requiring source or test verification.
+
+The assumption this invalidates: the design assumed a transcript could be shipped wholesale to a hosted model for extraction, and that all verdicts carry equal epistemic weight. Both are now false. Record this framing in the final checkpoint.
+
+Three focused changes. Preserve all existing behaviour.
+
+1. Local becomes the enforced default. --backend local (Ollama) is the default and sends nothing off-machine. The API path requires an explicit --backend api plus an --allow-external flag, and prints a warning naming what leaves the machine. Document the argument that Anthropic is not a new external service for Claude Code transcripts, since Claude Code authored them — but the tool must not rely on that by default.
+
+2. Evidence tiering. Every verdict gains an evidence_class of confirmed_structural, heuristic, or requires_verification. Assign it from the evaluator that produced it, not from the verdict: graph relation lookups are confirmed; regex-based literal_in_body, the test-path heuristic, and textual turn attribution for dropped are heuristic; unverified and any None return require verification. Surface it as a column. Do not let a heuristic verdict be presented as confirmed.
+
+3. Graceful degradation. Run against the attached partial-analysis fixture. Redacted or missing transcript fields must not crash and must not silently drop requirements — affected rows report with reduced evidence class rather than disappearing. A partial transcript yields a partial report, never a corrupted or discarded one.
+
+Tests, covering: complete input, redacted fields, missing fields, and local-backend-only operation with no network.
+
+Separately and first: the false dropped verdicts on timeout and test are a real bug. Those symbols exist in the code. Diagnose whether it is an extraction-assertion mismatch or an evaluator error before building on top of it. Tiering must not be used to excuse it.
+
+Report the impact analysis before you write anything.
+
+---
+
+<task-notification>
+<task-id>b2honx0gx</task-id>
+<tool-use-id>toolu_01K5pJnM9ENqu96Qx9oHAZq1</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/31806c82-cc1a-4b6b-8fbd-a0d69cc5f590/tasks/b2honx0gx.output</output-file>
+<status>completed</status>
+<summary>Background command "Run drift.py against demo fixture with local Ollama backend" completed (exit code 0)</summary>
+</task-notification>
