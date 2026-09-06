@@ -19,6 +19,9 @@ ASSERTION_TYPES = {
     "test_references",
     "literal_in_body",
 }
+# --backend api is opt-in only (--allow-external, see main()), never the default -
+# Anthropic arguably isn't a *new* party for a transcript Claude Code itself wrote,
+# but this tool does not rely on that argument by default.
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
 EXTRACTION_MODEL = "claude-haiku-4-5"
@@ -50,15 +53,7 @@ closed list and fill its arguments, OR decide it is unverifiable:
   test_references(symbol)       a test must reference this symbol
   literal_in_body(symbol, value) the literal `value` must appear in symbol's source
 
-A "symbol" is a function, class, or variable that tree-sitter parses out of source \
-- never a filename and never a line count. "single file drift.py" is not \
-symbol_exists("drift.py"): a file is not a symbol, so this is unverifiable, full \
-stop. Likewise unverifiable: counts ("retry up to 5 times", "at most 400 lines", \
-"exactly one call to the API" - a count, not a reachability claim even though \
-"call" is right there); file layout, naming, and line-count targets ("single \
-file", "target 250 lines"); dependency/tooling constraints ("stdlib plus requests \
-only", "no framework"); performance or timing ("must be fast", "add a timeout"); \
-and process constraints ("do not reimplement entire"). Before you emit any \
+A "symbol" is a function, class, or method that tree-sitter parses out of source as its own named definition - never a filename, a line count, or a parameter, instance attribute, local variable, or config default, even though those are also "variables" in the everyday sense. `timeout` in `def __init__(self, timeout=5.0)` is real code but not independently checkable here: unverifiable, not symbol_exists("timeout"). "single file drift.py" is not symbol_exists("drift.py") either: a file is not a symbol. Likewise unverifiable: counts ("retry up to 5 times", "at most 400 lines", "exactly one call to the API" - a count, not a reachability claim even though "call" is right there); file layout and line-count targets; dependency/tooling constraints ("stdlib plus requests only"); performance, timing, or parameter/attribute values ("must be fast", "add a timeout", "default retry count is 5"); and process constraints ("do not reimplement entire"). Before you emit any \
 assertion other than unverifiable, name the exact symbol it is about - if you \
 cannot name one that tree-sitter would parse, it is unverifiable. When in doubt, \
 use unverifiable - a forced assertion that can never truthfully pass is worse \
@@ -156,10 +151,13 @@ def parse_transcript(raw):
             record = json.loads(line)
         except json.JSONDecodeError:
             continue
-        role = record.get("role") or record.get("message", {}).get("role")
+        if not isinstance(record, dict):
+            continue
+        # `or {}` not a .get default: redaction may null a present key, not omit it.
+        role = record.get("role") or (record.get("message") or {}).get("role")
         if role not in ("user", "assistant"):
             continue
-        message = record.get("message", record)
+        message = record.get("message") or record
         content = message.get("content")
         msg_id = message.get("id")
         key = (role, msg_id) if msg_id else (role, id(record))
@@ -185,7 +183,7 @@ def parse_transcript(raw):
                 if btype == "text":
                     current["text_parts"].append(block.get("text", ""))
                 elif btype == "tool_use":
-                    current["tool_uses"].append({"name": block.get("name", ""), "input": block.get("input", {})})
+                    current["tool_uses"].append({"name": block.get("name", ""), "input": block.get("input") or {}})
                 elif btype == "tool_result":
                     current["kind"] = "tool_result"
 
@@ -206,6 +204,8 @@ def build_graph_index(raw):
         try:
             record = json.loads(line)
         except json.JSONDecodeError:
+            continue
+        if not isinstance(record, dict):
             continue
         rtype = record.get("record_type")
         if rtype == "symbol":
@@ -302,15 +302,16 @@ def eval_literal_in_body(args, graph):
             return True
     return False
 
-# Per type: (evaluator, evidence-string builder, needles-for-drop-scan builder).
-# One dict, one source of truth per assertion type - a sixth type adds a row
-# here and nowhere else.
+# Per type: (evaluator, evidence-string builder, needles-for-drop-scan builder,
+# evidence_class - set by what kind of check the evaluator does, not by whether
+# it passed: a graph relation lookup is confirmed_structural; a regex-over-text
+# or file-path heuristic is heuristic, however confident its evidence reads).
 ASSERTION_HANDLERS = {
-    "symbol_exists": (eval_symbol_exists, lambda a, ok: f"regex search for /{a.get('pattern')}/ in symbol names: {'match' if ok else 'no match'}", lambda a: [a.get("pattern")]),
-    "has_inbound_edge": (eval_has_inbound_edge, lambda a, ok: f"inbound relations to '{a.get('symbol')}': {'found' if ok else 'not found'}", lambda a: [a.get("symbol")]),
-    "calls": (eval_calls, lambda a, ok: f"CALLS/ASYNC_CALLS from '{a.get('caller')}' to '{a.get('callee')}': {'found' if ok else 'not found'}", lambda a: [a.get("caller"), a.get("callee")]),
-    "test_references": (eval_test_references, lambda a, ok: f"inbound edge from a test-path file to '{a.get('symbol')}': {'found' if ok else 'not found'}", lambda a: [a.get("symbol")]),
-    "literal_in_body": (eval_literal_in_body, lambda a, ok: f"regex search for {a.get('value')!r} in '{a.get('symbol')}' source: {'found' if ok else 'not found'}", lambda a: [a.get("value")]),
+    "symbol_exists": (eval_symbol_exists, lambda a, ok: f"regex search for /{a.get('pattern')}/ in symbol names: {'match' if ok else 'no match'}", lambda a: [a.get("pattern")], "confirmed_structural"),
+    "has_inbound_edge": (eval_has_inbound_edge, lambda a, ok: f"inbound relations to '{a.get('symbol')}': {'found' if ok else 'not found'}", lambda a: [a.get("symbol")], "confirmed_structural"),
+    "calls": (eval_calls, lambda a, ok: f"CALLS/ASYNC_CALLS from '{a.get('caller')}' to '{a.get('callee')}': {'found' if ok else 'not found'}", lambda a: [a.get("caller"), a.get("callee")], "confirmed_structural"),
+    "test_references": (eval_test_references, lambda a, ok: f"inbound edge from a test-path file to '{a.get('symbol')}': {'found' if ok else 'not found'}", lambda a: [a.get("symbol")], "heuristic"),
+    "literal_in_body": (eval_literal_in_body, lambda a, ok: f"regex search for {a.get('value')!r} in '{a.get('symbol')}' source: {'found' if ok else 'not found'}", lambda a: [a.get("value")], "heuristic"),
 }
 
 def find_dropped_turn(turns, needles):
@@ -338,7 +339,15 @@ def main():
     parser.add_argument("--repo", required=True)
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--backend", choices=["local", "api"], default="local")
+    parser.add_argument("--allow-external", action="store_true",
+        help="required with --backend api: sends user-prompt text off this machine")
     args = parser.parse_args()
+    if args.backend == "api" and not args.allow_external:
+        raise SystemExit("--backend api also requires --allow-external: it sends user-prompt "
+            "text to the Anthropic API, off this machine. --backend local (Ollama, on "
+            "localhost) is the default and sends nothing off-machine.")
+    if args.backend == "api":
+        print(f"warning: sending user-prompt text to {ANTHROPIC_API_URL} ({EXTRACTION_MODEL})", file=sys.stderr)
 
     transcript_raw = run_entire(["checkpoint", "explain", args.checkpoint, "--transcript"], args.repo)
     turns = parse_transcript(transcript_raw)
@@ -354,31 +363,35 @@ def main():
     requirements = extract_requirements(prompt_text, backend=args.backend)
 
     rows = []
-    deferred = 0
     for req in requirements:
         req_args = req["assertion"].get("args", {})
         handler = ASSERTION_HANDLERS.get(req["assertion"]["type"])
         result = handler[0](req_args, graph) if handler else None
         if result is None:
-            deferred += 1
+            # unverifiable type, or nothing to check - a real verdict, not a row to drop.
+            rows.append((req["requirement"], "unverified", "no checkable assertion", "requires_verification"))
             continue
         verdict = "landed" if result else "absent"
         evidence = handler[1](req_args, result)
+        evidence_class = handler[3]
         if verdict == "absent":
             dropped_at = find_dropped_turn(turns, handler[2](req_args))
             if dropped_at is not None:
                 verdict = "dropped"
                 evidence += f"; appeared in a write/edit at turn {dropped_at}, missing from final graph"
-        rows.append((req["requirement"], verdict, evidence))
+                evidence_class = "heuristic"  # textual turn attribution, however the base check tiers
+        rows.append((req["requirement"], verdict, evidence, evidence_class))
 
     label_width = min(60, max((len(r[0]) for r in rows), default=10))
-    print(f"\n{'requirement':<{label_width}}  {'verdict':<9}  evidence")
-    for requirement, verdict, evidence in rows:
+    header = f"{'requirement':<{label_width}}  {'verdict':<10}  {'evidence_class':<20}  evidence"
+    print(f"\n{header}")
+    for requirement, verdict, evidence, evidence_class in rows:
         label = requirement if len(requirement) <= label_width else requirement[: label_width - 1] + "…"
-        print(f"{label:<{label_width}}  {verdict:<9}  {evidence}")
-    print(f"\n({deferred} requirement(s) deferred to a later stage: unverifiable type or no answer)")
+        print(f"{label:<{label_width}}  {verdict:<10}  {evidence_class:<20}  {evidence}")
+    deferred = sum(1 for _, verdict, _, _ in rows if verdict == "unverified")
+    print(f"\n({deferred} requirement(s) unverified: unverifiable type or no answer)")
 
-    if any(verdict in ("absent", "dropped") for _, verdict, _ in rows):
+    if any(verdict in ("absent", "dropped") for _, verdict, _, _ in rows):
         sys.exit(1)
 
 if __name__ == "__main__":
