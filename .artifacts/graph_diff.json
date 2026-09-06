@@ -1,0 +1,243 @@
+{
+  "base": "main",
+  "head": "stage-1-4-progress",
+  "files": [
+    {
+      "path": "CLAUDE.md",
+      "status": "M",
+      "language": "Markdown",
+      "changes": [
+        {
+          "type": "added",
+          "kind": "section",
+          "name": "Track-1:-privacy-boundary",
+          "new_signature": "markdown heading Track 1: privacy boundary",
+          "after_start_line": 70,
+          "dependents_count": 0
+        }
+      ]
+    },
+    {
+      "path": "drift.py",
+      "status": "M",
+      "language": "Python",
+      "changes": [
+        {
+          "type": "body_changed",
+          "kind": "function",
+          "name": "parse_transcript",
+          "before_start_line": 146,
+          "after_start_line": 141,
+          "dependents_count": 7
+        },
+        {
+          "type": "body_changed",
+          "kind": "function",
+          "name": "build_graph_index",
+          "before_start_line": 197,
+          "after_start_line": 195,
+          "dependents_count": 6
+        },
+        {
+          "type": "body_changed",
+          "kind": "function",
+          "name": "main",
+          "before_start_line": 336,
+          "after_start_line": 337,
+          "dependents_count": 4
+        }
+      ]
+    },
+    {
+      "path": "test_drift.py",
+      "status": "A",
+      "language": "Python",
+      "changes": [
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestParseTranscript",
+          "new_signature": "class TestParseTranscript(unittest.TestCase)",
+          "after_start_line": 55,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestParseTranscript.test_complete_groups_turns",
+          "new_signature": "def test_complete_groups_turns(self)",
+          "after_start_line": 56,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestParseTranscript.test_redacted_fields_degrade_not_crash",
+          "new_signature": "def test_redacted_fields_degrade_not_crash(self)",
+          "after_start_line": 63,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestParseTranscript.test_missing_and_malformed_lines_do_not_crash",
+          "new_signature": "def test_missing_and_malformed_lines_do_not_crash(self): # only {\"role\": \"user\"} is usable; the rest (no role, invalid JSON, a # bare `null`) must be skipped, not raise.",
+          "after_start_line": 69,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestBuildGraphIndex",
+          "new_signature": "class TestBuildGraphIndex(unittest.TestCase)",
+          "after_start_line": 77,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestBuildGraphIndex.test_complete_graph",
+          "new_signature": "def test_complete_graph(self)",
+          "after_start_line": 78,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestBuildGraphIndex.test_partial_graph_does_not_crash_and_keeps_usable_symbols",
+          "new_signature": "def test_partial_graph_does_not_crash_and_keeps_usable_symbols(self)",
+          "after_start_line": 83,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestFindDroppedTurn",
+          "new_signature": "class TestFindDroppedTurn(unittest.TestCase)",
+          "after_start_line": 88,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestFindDroppedTurn.test_redacted_tool_input_does_not_crash",
+          "new_signature": "def test_redacted_tool_input_does_not_crash(self)",
+          "after_start_line": 89,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestEvalLiteralInBody",
+          "new_signature": "class TestEvalLiteralInBody(unittest.TestCase)",
+          "after_start_line": 94,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestEvalLiteralInBody.test_missing_file_returns_false_not_crash",
+          "new_signature": "def test_missing_file_returns_false_not_crash(self)",
+          "after_start_line": 95,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestEvalLiteralInBody.test_no_value_is_none_not_false",
+          "new_signature": "def test_no_value_is_none_not_false(self)",
+          "after_start_line": 102,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestEvidenceTiering",
+          "new_signature": "class TestEvidenceTiering(unittest.TestCase)",
+          "after_start_line": 107,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestEvidenceTiering.test_graph_relation_lookups_are_confirmed_structural",
+          "new_signature": "def test_graph_relation_lookups_are_confirmed_structural(self)",
+          "after_start_line": 108,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestEvidenceTiering.test_regex_and_path_heuristics_are_heuristic",
+          "new_signature": "def test_regex_and_path_heuristics_are_heuristic(self)",
+          "after_start_line": 112,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestBackendGating",
+          "new_signature": "class TestBackendGating(unittest.TestCase)",
+          "after_start_line": 117,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestBackendGating.test_api_without_allow_external_exits_before_any_call",
+          "new_signature": "def test_api_without_allow_external_exits_before_any_call(self, mock_extract, mock_run)",
+          "after_start_line": 120,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestBackendGating.test_local_backend_only_ever_contacts_localhost",
+          "new_signature": "def test_local_backend_only_ever_contacts_localhost(self, mock_post)",
+          "after_start_line": 129,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "class",
+          "name": "TestMainEndToEnd",
+          "new_signature": "class TestMainEndToEnd(unittest.TestCase)",
+          "after_start_line": 136,
+          "dependents_count": 0
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestMainEndToEnd._run_main",
+          "new_signature": "def _run_main(self, transcript, graph_ndjson, requirements, extra_argv=())",
+          "after_start_line": 137,
+          "dependents_count": 3
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestMainEndToEnd.fake_run_entire",
+          "new_signature": "def fake_run_entire(cmd_args, repo)",
+          "after_start_line": 138,
+          "dependents_count": 2
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestMainEndToEnd.test_complete_input_surfaces_all_tiers",
+          "new_signature": "def test_complete_input_surfaces_all_tiers(self)",
+          "after_start_line": 153,
+          "dependents_count": 1
+        },
+        {
+          "type": "added",
+          "kind": "method",
+          "name": "TestMainEndToEnd.test_redacted_and_missing_fields_yield_partial_not_crashed_report",
+          "new_signature": "def test_redacted_and_missing_fields_yield_partial_not_crashed_report(self)",
+          "after_start_line": 167,
+          "dependents_count": 1
+        }
+      ]
+    }
+  ]
+}
