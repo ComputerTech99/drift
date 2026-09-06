@@ -121,9 +121,12 @@ held.
 
 ## Checkpoint links and what each checkpoint proves
 
-All four checkpoints below were created today (2026-09-06), each tied to one
+All seven checkpoints below were created today (2026-09-06), each tied to one
 committed stage on this branch (verified via `entire checkpoint explain
-<commit-sha>`, not assumed from commit messages):
+<commit-sha>`, not assumed from commit messages). The first four are the
+substantive build stages; the last three are documentation/evidence/cleanup
+follow-ups made while preparing this submission, listed for completeness
+rather than left out:
 
 | Checkpoint | Commit | Created | What it proves |
 |---|---|---|---|
@@ -131,6 +134,9 @@ committed stage on this branch (verified via `entire checkpoint explain
 | `01M1TNGEWC61CPW6SRDVFBJXMM` | `98d7410` | 06:11:52 | Stage 2 landed: `extract_requirements` with a swappable local/api backend and schema-constrained JSON output, as the single LLM call in the program. |
 | `01M1TQ54CDJMHNHTPCR34RVHDY` | `7091380` | 06:40:38 | Stages 3–4 landed, plus a self-caught regression: the transcript shows the extraction prompt over-forcing background prose into requirements and avoiding `unverifiable`, both fixed and re-verified against the tool's own self-referential checkpoint; `find_dropped_turn` added; the timeout/test false-`dropped` bug was identified but explicitly left unfixed when this checkpoint closed. |
 | `01M1TRF08X18M5CXSVY310AW0Z` | `8eb8e77` | 07:03:30 | Today's curveball: diagnosed the timeout/test bug as an extraction-assertion mismatch (not an evaluator bug) via direct graph inspection before any edit; then enforced the Privacy Boundary (local-default backend, `--allow-external` gate, `evidence_class` tiering, redaction hardening), backed by 14 passing tests. |
+| `01M1TV1DRSHP9MEEEFNBX635GK` | `79e3fc5` | 07:48:32 | Added this document and `.artifacts/` (the graph search/impact/diff evidence, persisted rather than run-and-discarded). |
+| `01M1TVCS9BP281QYHS1DZ894PS` | `b580d85` | 07:54:44 | Fixed the setup instructions (venv needed for PEP 668 systems) and disclosed the key-fragment finding from the final secrets checklist. |
+| `01M1TW0KSKTHPHFEE3DD11H166` | `50bdd1d` | 08:05:34 | Documented `--backend api` as present but untested this session (no fresh key supplied), and the local-model extraction-quality demo risk found during dry-run testing. |
 
 ## Setup, run and test instructions
 
@@ -168,17 +174,25 @@ are `entire checkpoint explain --transcript` (session transcripts) and
   probabilistic mitigation on a single non-deterministic LLM call, not a
   guarantee. A future run could still mistarget an assertion, and evidence
   tiering must never be used to excuse that if it happens again.
-- Local-model extraction quality is not verified end-to-end in this
-  environment. The one locally available model actually exercised against
-  the real demo-repo checkpoint during this session, `gemma3:4b`, produced
-  malformed, repetition-looped JSON rather than a clean requirement list,
-  even with a JSON-schema-constrained decode. (`nemotron-3-nano:4b` was also
-  available locally but was not exercised.) All of today's positive
-  verification — the corrected evidence table, the timeout/test diagnosis,
-  the passing end-to-end tests — used either previously recorded hosted-API
-  output or mocked extraction, not a completed real local-model run.
+- **Local-model extraction quality is demonstrably weak, not just
+  unverified.** Three separate live runs of `gemma3:4b` (the only pulled
+  model small enough to be usable here; `nemotron-3-nano:4b` was available
+  but not exercised) against the real demo-repo checkpoint were made across
+  this build: one produced malformed, repetition-looped JSON; two later ones
+  (in the final dry-run pass) completed but hallucinated `EXTRACTION_SYSTEM`'s
+  own few-shot examples — literally "build a CLI tool called drift" and "add
+  retry with exponential backoff" — as if they were real requirements from
+  the HTTP-client session, and in one run fabricated a nonexistent symbol
+  name (`exponential_backoff`) to check against. Also, `OLLAMA_MODEL`
+  defaults to `"llama3.1"` in `drift.py`, which was never pulled on this
+  machine — the literal default backend fails outright unless `OLLAMA_MODEL`
+  is exported to a model that's actually installed. All of today's *positive*
+  verification (the corrected evidence table, the timeout/test diagnosis, the
+  passing end-to-end tests) used previously recorded hosted-API output or
+  mocked extraction, never a completed, correct real local-model run.
   `--backend local`'s argument handling, URL, and degradation behavior are
-  verified; the quality of what a real local model actually extracts is not.
+  verified; what a real local model actually extracts, on this machine, is
+  not demo-ready.
 - `entire graph impact` cannot see calls made through the
   `ASSERTION_HANDLERS` dict-dispatch table — a load-bearing part of the
   verdict/evidence path shows zero callers under static impact analysis.
@@ -189,6 +203,14 @@ are `entire checkpoint explain --transcript` (session transcripts) and
   `main()` — it is not currently produced. Left untouched as out of scope for
   this checkpoint, but it is a real, pre-existing gap between documented and
   actual behavior.
+- `--backend api` is present and code-complete (schema-constrained hosted
+  fallback via `claude-haiku-4-5`, gated behind `--allow-external`) but
+  **untested this session**: the old key from a prior session was confirmed
+  absent from this environment (unset, not in any shell rc file or `.env`),
+  and no fresh key was supplied to test a live call against it before
+  submission. Do not read the earlier checkpoints' recorded `--backend api`
+  runs as proof this session's code path was re-verified live — it wasn't.
+  `--backend local` is what was demonstrated today.
 - **Found while auditing this submission, from a session predating today's
   work:** the `last-prompt` preview field of two earlier checkpoints
   (`01M1TNGEWC61CPW6SRDVFBJXMM`, `01M1TQ54CDJMHNHTPCR34RVHDY`) contains an
