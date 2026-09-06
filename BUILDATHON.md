@@ -243,11 +243,7 @@ are `entire checkpoint explain --transcript` (session transcripts) and
   `--backend local` is what was demonstrated today.
 - **Found while auditing this submission, from a session predating today's
   work:** the `last-prompt` preview field of two earlier checkpoints
-  (`01M1TNGEWC61CPW6SRDVFBJXMM`, `01M1TQ54CDJMHNHTPCR34RVHDY`) contains an
-  18-character fragment of what appears to be a real Anthropic API key
-  (`sk-ant-api03-tHnD…`, truncated by the harness's own preview at that
-  length — only ~4 characters beyond the public key-format prefix are
-  exposed). It surfaces because `entire checkpoint explain <id> --transcript`
+  (`01M1TNGEWC61CPW6SRDVFBJXMM`, `01M1TQ54CDJMHNHTPCR34RVHDY`) contains an 18-character fragment of what appears to be a real Anthropic API key, truncated by the harness's own preview at that length — only a few characters beyond the public key-format prefix were exposed. It surfaces because `entire checkpoint explain <id> --transcript`
   — the same command drift.py itself runs — returns it. Not introduced by
   today's checkpoint (confirmed absent from both of today's checkpoints);
   not remediated here, since rewriting already-pushed, already-merged
