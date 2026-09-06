@@ -90,7 +90,14 @@ flags do not exist.
 - Python 3, stdlib plus `requests`. No other dependencies.
 - Single file, `drift.py`. Target 250 lines, hard ceiling 400.
 - Shell out to `entire` via `subprocess`. Never reimplement it.
-- Model: `claude-sonnet-5`, one call, strict JSON out, no prose or fences.
+- Extraction backend is swappable: local (Ollama) by default, hosted fallback
+  via the Anthropic Messages API (`claude-haiku-4-5`). Both are JSON-schema-
+  constrained at decode time (Ollama `format`, Anthropic `output_config`).
+  One call, regardless of backend. Sarvam AI was tried and rejected: its
+  small-context conversational variant can't hold this project's own
+  checkpoint transcripts, and its reasoning variant burns its entire token
+  budget on hidden chain-of-thought before producing output, even on a
+  one-sentence prompt.
 - Parse the real ndjson field names. Do not assume a schema.
 - Exit non-zero if any verdict is `absent` or `dropped`.
 
