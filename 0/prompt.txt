@@ -1,0 +1,253 @@
+Before Stage 2, three things.
+
+1. Fix the turn grouping. You reported 76 turns from a format that is one line per content block. Those are content blocks, not turns. A single assistant message with a text block plus two tool_use blocks is three lines and one turn.
+
+Group lines into turns by message boundary. A turn is one role-message and all the content blocks belonging to it. Turn indices that are user-facing must come from that grouping. Keep block-level positions internally if you need them for evidence, but never print one — the whole product claims "this requirement vanished in turn nine", and a judge can open the checkpoint and count. Re-run and tell me the real turn count.
+
+2. Commit now and create the first checkpoint. Commit message body should record: the pipeline (transcript → LLM extraction → closed assertion enum → graph evaluation → verdicts), the intended architecture, and the three rejected options with reasons —
+
+shadow-branch turn attribution, rejected because those refs are condensed and cleaned up at commit time, so a reviewer running this on a landed commit finds nothing;
+LLM verification of the diff, rejected because asking a model to confirm requirements were met produces confident agreement, which is the exact failure being eliminated;
+scope-creep detection, cut for time, noisy without filtering.
+
+Also note the open risk: turn attribution is textual, derived from tool_use payloads.
+
+3. Then close the validation gap immediately. Once the checkpoint exists:
+
+bash
+entire checkpoint explain --json
+entire checkpoint explain <id> --transcript | head -50
+
+Do not assume this matches the raw Claude Code session file. There is a separate --raw-transcript flag, which implies the normalized transcript differs. What I need to know: do tool_use blocks survive with their payloads — file_path, and the old/new strings on edits? Show me the actual output.
+
+If payloads are stripped, check entire checkpoint explain <id> --raw-transcript --session-index 0 and switch the parser to whichever carries them. Stage 4 has no data source otherwise, and I want that answered now rather than at 11:15.
+
+Then Stage 2, with one constraint: the extraction call sees user-role content only. Not assistant turns, not tool calls. If the model sees what the agent did, it will extract requirements describing the implementation instead of the request, and everything comes back landed because it is summarising the diff. User prompts in, requirement list out.
+
+Report the real turn count and the transcript payload finding before writing the API call.
+
+---
+
+Change to Stage 2. The extraction call goes local instead of hitting the Anthropic API.
+
+Rationale to record in the checkpoint: Entire Graph is deterministic and local-first with no network calls. A hosted API call at the extraction step was the only network dependency in the tool. Removing it makes drift fully offline and removes a runtime failure mode.
+
+Structure it as a swappable backend. One function, extract_requirements(user_prompts) -> list[dict], returning the same shape regardless of backend. Select with --backend local|api, defaulting to local. The API path stays working as a fallback. Nothing downstream of this function knows or cares which ran.
+
+Local backend: Ollama HTTP API at http://localhost:11434/api/chat. Pass the JSON schema for the requirement list in the format parameter so the output is constrained by the decoder rather than by prompt instructions. Schema: an array of objects with requirement (string) and assertion (object with type as a string enum of exactly the six values — the five assertion types plus unverifiable — and args as an object).
+
+Do not hand-roll JSON repair. If the schema is enforced at decode time you don't need it. If output still comes back malformed, tell me rather than writing a parser to patch around it.
+
+Input stays user-role content only. Not assistant turns, not tool calls.
+
+Keep requests as the only non-stdlib dependency; Ollama is a plain HTTP POST.
+
+Report back with the extracted requirement list from a real transcript before moving to Stage 3.
+
+---
+
+<task-notification>
+<task-id>bamomkul3</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/bamomkul3.output</output-file>
+<status>completed</status>
+<summary>Background command "cd /Users/ojashkgupta/drift
+OLLAMA_MODEL=gemma3:4b /private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/venv/bin/python -c "
+import drift, requests, json
+transcript_raw = drift.run_entire(['checkpoint','explain','01M1TF95A2HA835AYCY52A9RZN','--transcript'], '.')
+turns = drift.parse_transcript(transcript_raw)
+prompt_text = '\n\n'.join(t['text'] for t in turns if t['kind']=='prompt')
+print('chars', len(prompt_text))
+resp = requests.post('http://localhost:11434/api/chat', json={
+    'model': 'gemma3:4b',
+    'messages': [
+        {'role':'system','content': drift.EXTRACTION_SYSTEM},
+        {'role':'user','content': prompt_text},
+    ],
+    'format': drift.REQUIREMENTS_SCHEMA,
+    'stream': False,
+    'options': {'num_ctx': 40000},
+}, timeout=580)
+print('status', resp.status_code)
+d = resp.json()
+content = d['message']['content']
+print('content len', len(content))
+print(content[:1500])
+" 2&gt;&amp;1 | tail -60" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+NVIDIA Nemotron 3 Nano 4B can we use this?
+
+---
+
+<task-notification>
+<task-id>b63d5oqx6</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/b63d5oqx6.output</output-file>
+<status>completed</status>
+<summary>Background command "df -h / | tail -2
+echo "---mem---"
+vm_stat | awk '/free/ {print $3}'
+echo "---pulling nemotron-3-nano:4b---"
+ollama pull nemotron-3-nano:4b 2&gt;&amp;1 | tail -30" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>btsg61ozb</task-id>
+<tool-use-id>toolu_0157Kv2EbXTw3X7seos6K2M9</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/btsg61ozb.output</output-file>
+<status>completed</status>
+<summary>Background command "while kill -0 95966 2&gt;/dev/null; do sleep 5; done
+cat /private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/nemotron_full_prompt1.out" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>buos69o4p</task-id>
+<tool-use-id>toolu_01SUHodoMm5Qhj1SrMEYJvRw</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/buos69o4p.output</output-file>
+<status>completed</status>
+<summary>Background command "while kill -0 96250 2&gt;/dev/null; do sleep 5; done
+cat /private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/nemotron_thinking.out" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+so if i get 5 dollar recharge how much time it will work?
+
+---
+
+and one thing locally it cant run by using nemotron-3-nano:4b
+
+---
+
+can i use other api instead of anthropic other might be cheap for this hackathon
+
+---
+
+will haiku work?
+
+---
+
+and all work will be done for this hackathon so i dont need to recharge it again na?
+
+---
+
+i got free credits for sarvam ai i can use that
+
+---
+
+sarvam ai api key  = REDACTED
+
+---
+
+<task-notification>
+<task-id>bt0xgkd8t</task-id>
+<tool-use-id>toolu_0164eBLqTSsYHREsshqtwnVS</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/bt0xgkd8t.output</output-file>
+<status>failed</status>
+<summary>Background command "export SARVAM_API_KEY="REDACTED"
+cd /Users/ojashkgupta/drift
+/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/venv/bin/python -c "
+import drift
+transcript_raw = drift.run_entire(['checkpoint','explain','01M1TF95A2HA835AYCY52A9RZN','--transcript'], '.')
+turns = drift.parse_transcript(transcript_raw)
+prompt_text = '\n\n'.join(t['text'] for t in turns if t['kind']=='prompt')
+items = drift._extract_api(prompt_text)
+import json
+print('num items:', len(items))
+print(json.dumps(items, indent=2))
+"
+" failed with exit code 1</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bdqcjtlb7</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/bdqcjtlb7.output</output-file>
+<status>completed</status>
+<summary>Background command "export SARVAM_API_KEY="REDACTED"
+cd /Users/ojashkgupta/drift
+/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/venv/bin/python -c "
+import drift
+transcript_raw = drift.run_entire(['checkpoint','explain','01M1TF95A2HA835AYCY52A9RZN','--transcript'], '.')
+turns = drift.parse_transcript(transcript_raw)
+prompt_text = '\n\n'.join(t['text'] for t in turns if t['kind']=='prompt')
+items = drift._extract_api(prompt_text)
+import json
+print('num items:', len(items))
+print(json.dumps(items, indent=2))
+" &gt; /private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/sarvam_run.out 2&gt;&amp;1
+echo DONE" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bzbqtyn5h</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/tasks/bzbqtyn5h.output</output-file>
+<status>completed</status>
+<summary>Background command "export SARVAM_API_KEY="REDACTED"
+cd /Users/ojashkgupta/drift
+/private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/venv/bin/python -c "
+import drift, requests, json, os, time
+transcript_raw = drift.run_entire(['checkpoint','explain','01M1TF95A2HA835AYCY52A9RZN','--transcript'], '.')
+turns = drift.parse_transcript(transcript_raw)
+prompt_text = '\n\n'.join(t['text'] for t in turns if t['kind']=='prompt')
+t0 = time.time()
+resp = requests.post(
+    drift.SARVAM_API_URL,
+    headers={'content-type':'application/json','api-subscription-key': os.environ['SARVAM_API_KEY']},
+    json={
+        'model': 'sarvam-105b',
+        'messages': [
+            {'role':'system','content': drift.EXTRACTION_SYSTEM},
+            {'role':'user','content': prompt_text},
+        ],
+        'max_tokens': 20000,
+        'reasoning_effort': 'low',
+        'response_format': {
+            'type':'json_schema',
+            'json_schema': {'name':'requirements','strict':True,'schema':drift.REQUIREMENTS_SCHEMA},
+        },
+    },
+    timeout=600,
+)
+print('elapsed', time.time()-t0)
+print('status', resp.status_code)
+d = resp.json()
+print('finish_reason', d['choices'][0]['finish_reason'])
+print('usage', d['usage'])
+content = d['choices'][0]['message'].get('content')
+print('content is None:', content is None)
+if content:
+    print(content)
+else:
+    rc = d['choices'][0]['message'].get('reasoning_content')
+    print('reasoning_content len', len(rc) if rc else 0)
+" &gt; /private/tmp/claude-501/-Users-ojashkgupta-drift/78dae017-6716-4b47-9f3d-9794d285fe00/scratchpad/sarvam_bigtry.out 2&gt;&amp;1
+echo DONE" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+REDACTED curl https://api.anthropic.com/v1/messages \
+        --header "x-api-key: REDACTED" \
+        --header "anthropic-version: 2023-06-01" \
+        --header "content-type: application/json" \
+        --data \
+    '{
+        "model": "claude-sonnet-4-6",
+        "max_tokens": 1024,
+        "messages": [
+            {"role": "user", "content": "Hello, world"}
+        ]
+    }'
