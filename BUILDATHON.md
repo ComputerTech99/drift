@@ -135,7 +135,10 @@ committed stage on this branch (verified via `entire checkpoint explain
 ## Setup, run and test instructions
 
 ```bash
-# requires entire 0.6.2+ and Python 3 with `requests` installed
+# requires entire 0.6.2+ and Python 3. On systems with a PEP 668-managed
+# system Python (Debian/Ubuntu, current Homebrew Python - a bare `pip
+# install` fails there with "externally-managed-environment"), use a venv:
+python3 -m venv venv && source venv/bin/activate
 pip install requests
 
 # local backend (Ollama on localhost) is the default and sends nothing off-machine
@@ -186,3 +189,16 @@ are `entire checkpoint explain --transcript` (session transcripts) and
   `main()` — it is not currently produced. Left untouched as out of scope for
   this checkpoint, but it is a real, pre-existing gap between documented and
   actual behavior.
+- **Found while auditing this submission, from a session predating today's
+  work:** the `last-prompt` preview field of two earlier checkpoints
+  (`01M1TNGEWC61CPW6SRDVFBJXMM`, `01M1TQ54CDJMHNHTPCR34RVHDY`) contains an
+  18-character fragment of what appears to be a real Anthropic API key
+  (`sk-ant-api03-tHnD…`, truncated by the harness's own preview at that
+  length — only ~4 characters beyond the public key-format prefix are
+  exposed). It surfaces because `entire checkpoint explain <id> --transcript`
+  — the same command drift.py itself runs — returns it. Not introduced by
+  today's checkpoint (confirmed absent from both of today's checkpoints);
+  not remediated here, since rewriting already-pushed, already-merged
+  checkpoint/git history is a destructive, shared-history operation outside
+  this checkpoint's scope and requires the repo owner's explicit decision.
+  Recommendation: rotate that key.
