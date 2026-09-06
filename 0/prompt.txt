@@ -1,0 +1,24 @@
+Time check: 92 minutes to the 3:00 PM submission deadline. No more feature work on drift.py from here — only cleanup, evidence, docs, and demo prep.
+
+1. Confirm the old Anthropic key is fully dead and nothing depends on it. echo $ANTHROPIC_API_KEY and confirm it's either unset or replaced with a freshly generated one. If --backend api is meant to work as a fallback today, it needs a live key — test it with one cheap call. If you don't have a working key and don't intend to use the API path today, note in BUILDATHON.md that --backend api is present but untested this session, so it isn't overclaimed.
+
+2. Clean up cruft — the repo root and working tree only, not drift.py's logic:
+
+Remove any throwaway files: the earlier fixture repo used to validate the transcript format tonight, scratch scripts, stray .txt/.json test output that isn't in .artifacts/, __pycache__, .pyc files, unused venvs.
+Check git status for anything untracked that shouldn't be there and either commit it (if it's real evidence) or delete it (if it's scratch).
+Do NOT touch: drift.py, test_drift.py, CLAUDE.md, BUILDATHON.md, .artifacts/, .claude/, .entire/. Do NOT refactor, rename, or "improve" anything in drift.py. If you notice something you want to fix, tell me instead of fixing it.
+
+3. Do a single clean dry run of the actual demo, timed:
+
+Fresh terminal, python drift.py --repo <fixture-or-self> --checkpoint <id>, let it run to completion uninterrupted.
+Note how long it takes end to end. If it's over ~30 seconds, that's a demo-pacing problem to know about now, not on stage.
+Confirm the output table looks the way it will when shown to judges — no debug prints, no stack traces, no leftover diagnostic output mixed into the table.
+
+4. Verify every submission-required link actually resolves, from a fresh browser tab, not from memory:
+
+Fork URL
+Final commit SHA — confirm c7e8a20 (or whatever is current) is what's on main right now
+Each of the 4 checkpoint links, opened individually
+The .artifacts/ files, visible in the pushed repo
+
+Report back: key status, what got deleted, the dry-run timing and output, and which links you personally clicked and confirmed. Don't tell me it's done without having clicked them.
