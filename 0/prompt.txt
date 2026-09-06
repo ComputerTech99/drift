@@ -1,0 +1,47 @@
+push it
+
+---
+
+create the PR
+
+---
+
+Before anything else, verify a claim in the last commit message. It says impact analysis "preceded (not paralleled) every edit." Check the actual sequence: open the diff or session history for the timeout/test bug fix and the three privacy-boundary changes, and confirm whether a graph command (search or diff) ran and was reviewed before the first str_replace on drift.py in that work, or whether diagnosis and editing happened first and a graph check came alongside or after.
+
+Report which one actually happened. If the commit message overclaims the order, do not leave it — amend it (or note the correction in the next checkpoint) to say what really occurred. "Diagnosis and impact analysis were concurrent" is a fine, honest thing to have happened. A checkpoint asserting an order that didn't occur is not acceptable, especially in a tool whose entire premise is catching exactly that kind of gap between claimed and actual.
+
+Do not run the ultrareview yet.
+
+Once that's settled, do these four things in order:
+
+1. Capture the three required graph evidence artifacts, saved to a scratch file or the PR description, not just run and discarded:
+
+a entire graph search definition/code lookup
+the impact analysis for the curveball change (whenever it actually ran, per above — capture it now if it wasn't saved)
+a final semantic diff: entire graph diff --base main --head stage-1-4-progress
+
+2. Fill in BUILDATHON.md at the repo root using this outline, writing only what's true of this actual build — don't invent details:
+
+# Project name
+## One-sentence summary
+## Problem, intended user and why it matters
+## Selected Entire track and why Entire is essential
+## Architecture and main workflow
+## Entire Graph findings and verification
+## Noon Curveball: what changed and how we adapted
+## Checkpoint links and what each checkpoint proves
+## Setup, run and test instructions
+## Databricks use, data sources and limitations (if applicable)
+## Known limitations and next steps
+
+For the Curveball section, use the same three-part structure as the checkpoint: what assumption was invalidated, how the design changed, why the result is safe — matching whatever the corrected commit message says, not the original draft.
+
+For Known limitations, include, honestly: the timeout/test extraction-assertion mismatch and its fix (probabilistic, not guaranteed); that local-model extraction quality is unverified end-to-end in this environment; and whatever the answer to the impact-analysis-timing question above turned out to be, if it wasn't a clean "before."
+
+For Checkpoint links, list all checkpoints created today with real commit SHAs or URLs and one sentence each on what it proves.
+
+3. Decide and resolve the merge question. Two PRs are open against main (#1, #2). Submission needs one fork URL and one final commit SHA. Merge both PRs into main now if that's the SHA you're submitting, so there's no ambiguity later.
+
+4. Run the final checklist: clean checkout launches drift.py, all 14 tests pass, checkpoints open and explain their milestones, no secrets or API keys anywhere in the repo or checkpoint content, README/BUILDATHON.md has no placeholder text left.
+
+Report back after each of the four steps, not all at once.

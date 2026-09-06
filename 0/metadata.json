@@ -1,0 +1,49 @@
+{
+  "cli_version": "0.10.5",
+  "checkpoint_id": "01M1TV1DRSHP9MEEEFNBX635GK",
+  "session_id": "31806c82-cc1a-4b6b-8fbd-a0d69cc5f590",
+  "strategy": "manual-commit",
+  "created_at": "2026-09-06T07:48:32.567163Z",
+  "branch": "stage-1-4-progress",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "BUILDATHON.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5",
+  "turn_id": "1db5f0f3b63b",
+  "checkpoint_transcript_start": 495,
+  "transcript_lines_at_start": 495,
+  "compact_transcript_start": 83,
+  "token_usage": {
+    "input_tokens": 54,
+    "cache_creation_tokens": 43817,
+    "cache_read_tokens": 6292756,
+    "output_tokens": 32212,
+    "api_call_count": 27
+  },
+  "session_metrics": {
+    "turn_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-09-06T07:48:32.493588Z",
+    "agent_lines": 188,
+    "agent_removed": 0,
+    "human_added": 421,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 609,
+    "total_lines_changed": 609,
+    "agent_percentage": 30.870279146141215,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
