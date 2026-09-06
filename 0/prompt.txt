@@ -1,0 +1,27 @@
+Before Stage 2, three things.
+
+1. Fix the turn grouping. You reported 76 turns from a format that is one line per content block. Those are content blocks, not turns. A single assistant message with a text block plus two tool_use blocks is three lines and one turn.
+
+Group lines into turns by message boundary. A turn is one role-message and all the content blocks belonging to it. Turn indices that are user-facing must come from that grouping. Keep block-level positions internally if you need them for evidence, but never print one — the whole product claims "this requirement vanished in turn nine", and a judge can open the checkpoint and count. Re-run and tell me the real turn count.
+
+2. Commit now and create the first checkpoint. Commit message body should record: the pipeline (transcript → LLM extraction → closed assertion enum → graph evaluation → verdicts), the intended architecture, and the three rejected options with reasons —
+
+shadow-branch turn attribution, rejected because those refs are condensed and cleaned up at commit time, so a reviewer running this on a landed commit finds nothing;
+LLM verification of the diff, rejected because asking a model to confirm requirements were met produces confident agreement, which is the exact failure being eliminated;
+scope-creep detection, cut for time, noisy without filtering.
+
+Also note the open risk: turn attribution is textual, derived from tool_use payloads.
+
+3. Then close the validation gap immediately. Once the checkpoint exists:
+
+bash
+entire checkpoint explain --json
+entire checkpoint explain <id> --transcript | head -50
+
+Do not assume this matches the raw Claude Code session file. There is a separate --raw-transcript flag, which implies the normalized transcript differs. What I need to know: do tool_use blocks survive with their payloads — file_path, and the old/new strings on edits? Show me the actual output.
+
+If payloads are stripped, check entire checkpoint explain <id> --raw-transcript --session-index 0 and switch the parser to whichever carries them. Stage 4 has no data source otherwise, and I want that answered now rather than at 11:15.
+
+Then Stage 2, with one constraint: the extraction call sees user-role content only. Not assistant turns, not tool calls. If the model sees what the agent did, it will extract requirements describing the implementation instead of the request, and everything comes back landed because it is summarising the diff. User prompts in, requirement list out.
+
+Report the real turn count and the transcript payload finding before writing the API call.
