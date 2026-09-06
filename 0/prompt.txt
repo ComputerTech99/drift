@@ -1,0 +1,25 @@
+Two decisions, then verification. No more code changes to drift.py.
+
+1. Make the repo public now.
+
+gh api -X PATCH repos/ComputerTech99/drift -f private=false
+
+Then re-verify with a fresh, unauthenticated WebFetch — not gh api — against the repo root, the commit at the current SHA, and .artifacts/. Confirm none of them require auth anymore.
+
+2. Fix the checkpoint links section in BUILDATHON.md. Replace any entire.io URL guess with: the repo URL (now public), each checkpoint's ID, and the exact command entire checkpoint explain <id> as how to inspect it. State plainly that Entire does not expose a standalone web URL per checkpoint in this workflow, so this is the correct and complete way to reference one — don't apologize for it, just state it as the answer.
+
+Leave the checkpoint table at whatever real checkpoints exist now (8, from the doc commits). Don't trim it and don't keep chasing "exactly 4" — pick the four that map to the four required milestones, label those clearly as the four, and let the rest exist as a fuller history.
+
+3. Do not attempt to fix the local extraction hallucination. It is not going into the live demo. Instead:
+
+Find the earlier captured output from Stage 3/4 where extraction was checked and verdicts were correct (the one with the test_references(symbol="HttpClient.get") control case, or the graph-verified table from the privacy-boundary work). Confirm that file or terminal capture still exists and is readable — this is what gets shown as "the tool's output," not a fresh live call.
+Add one line to Known Limitations, stated plainly and without spin: local extraction on this hardware, on a real-length transcript, has produced hallucinated content — including reproducing its own prompt's few-shot examples as if they were real extracted requirements — rather than degrading gracefully. The graph verification layer is unaffected: it correctly reported these fabricated symbols as absent rather than landed, because it never trusts the extraction output as ground truth.
+For anything live in the demo, use a deterministic graph command (search or diff), not the extraction step.
+
+4. Final link check, after step 1, from WebFetch only:
+
+Repo root
+Current commit SHA on main
+.artifacts/graph_diff.json, .artifacts/graph_impact.txt, .artifacts/graph_search.json
+
+Report the public/private status change and paste the actual WebFetch results, not a summary of them.
