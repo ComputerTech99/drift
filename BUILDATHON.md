@@ -121,12 +121,26 @@ held.
 
 ## Checkpoint links and what each checkpoint proves
 
-All seven checkpoints below were created today (2026-09-06), each tied to one
-committed stage on this branch (verified via `entire checkpoint explain
-<commit-sha>`, not assumed from commit messages). The first four are the
-substantive build stages; the last three are documentation/evidence/cleanup
-follow-ups made while preparing this submission, listed for completeness
-rather than left out:
+Repo: **https://github.com/ComputerTech99/drift**
+
+Entire does not expose a standalone web URL per checkpoint in this workflow —
+checkpoints are git refs on this same repo. The correct and complete way to
+reference or inspect one is: the repo URL above, the checkpoint's ID, and the
+command `entire checkpoint explain <id>` (add `--transcript` for the raw
+JSONL) run against a clone of that repo. That's not a limitation being
+apologized for — it's how this tool's checkpoints actually work, and it's
+what was used throughout this build and this document to verify every claim
+made about them.
+
+Eight checkpoints exist today (2026-09-06), each tied to one committed stage
+on this branch (verified via `entire checkpoint explain <commit-sha>`, not
+assumed from commit messages). **The four required milestones are the first
+four** — Stage 1, Stage 2, Stages 3–4, and the Privacy Boundary curveball. The
+remaining four are documentation/evidence/cleanup follow-ups made while
+preparing this submission itself, included for a complete history rather than
+trimmed to look tidier than what actually happened:
+
+**The four required milestones:**
 
 | Checkpoint | Commit | Created | What it proves |
 |---|---|---|---|
@@ -134,9 +148,15 @@ rather than left out:
 | `01M1TNGEWC61CPW6SRDVFBJXMM` | `98d7410` | 06:11:52 | Stage 2 landed: `extract_requirements` with a swappable local/api backend and schema-constrained JSON output, as the single LLM call in the program. |
 | `01M1TQ54CDJMHNHTPCR34RVHDY` | `7091380` | 06:40:38 | Stages 3–4 landed, plus a self-caught regression: the transcript shows the extraction prompt over-forcing background prose into requirements and avoiding `unverifiable`, both fixed and re-verified against the tool's own self-referential checkpoint; `find_dropped_turn` added; the timeout/test false-`dropped` bug was identified but explicitly left unfixed when this checkpoint closed. |
 | `01M1TRF08X18M5CXSVY310AW0Z` | `8eb8e77` | 07:03:30 | Today's curveball: diagnosed the timeout/test bug as an extraction-assertion mismatch (not an evaluator bug) via direct graph inspection before any edit; then enforced the Privacy Boundary (local-default backend, `--allow-external` gate, `evidence_class` tiering, redaction hardening), backed by 14 passing tests. |
+
+**Submission-prep follow-ups** (documentation, evidence capture, and cleanup — no changes to `drift.py` or `test_drift.py` in any of these):
+
+| Checkpoint | Commit | Created | What it proves |
+|---|---|---|---|
 | `01M1TV1DRSHP9MEEEFNBX635GK` | `79e3fc5` | 07:48:32 | Added this document and `.artifacts/` (the graph search/impact/diff evidence, persisted rather than run-and-discarded). |
 | `01M1TVCS9BP281QYHS1DZ894PS` | `b580d85` | 07:54:44 | Fixed the setup instructions (venv needed for PEP 668 systems) and disclosed the key-fragment finding from the final secrets checklist. |
 | `01M1TW0KSKTHPHFEE3DD11H166` | `50bdd1d` | 08:05:34 | Documented `--backend api` as present but untested this session (no fresh key supplied), and the local-model extraction-quality demo risk found during dry-run testing. |
+| `01M1TW3PTW9Z873JEWTYCKZ32Q` | `a302f3a` | 08:07:15 | Expanded this table to all checkpoints that exist (rather than undercounting at 4) and hardened the local-extraction limitation from "unverified" to "demonstrably weak" with concrete dry-run evidence. |
 
 ## Setup, run and test instructions
 
@@ -192,7 +212,17 @@ are `entire checkpoint explain --transcript` (session transcripts) and
   mocked extraction, never a completed, correct real local-model run.
   `--backend local`'s argument handling, URL, and degradation behavior are
   verified; what a real local model actually extracts, on this machine, is
-  not demo-ready.
+  not demo-ready. Stated plainly: local extraction on this hardware, on a
+  real-length transcript, has produced hallucinated content — including
+  reproducing its own prompt's few-shot examples as if they were real
+  extracted requirements — rather than degrading gracefully. The graph
+  verification layer is unaffected by this: it correctly reported these
+  fabricated symbols as `absent` rather than `landed`, because it never
+  trusts the extraction output as ground truth. See
+  `.artifacts/graph_verification_capture.txt` for a control-case capture of
+  that layer running correctly on both a real symbol and a mistargeted one,
+  independent of any extraction call — this is the output shown for the
+  live demo, not a fresh extraction run.
 - `entire graph impact` cannot see calls made through the
   `ASSERTION_HANDLERS` dict-dispatch table — a load-bearing part of the
   verdict/evidence path shows zero callers under static impact analysis.
