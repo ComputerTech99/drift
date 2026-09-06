@@ -189,6 +189,14 @@ are `entire checkpoint explain --transcript` (session transcripts) and
   `main()` — it is not currently produced. Left untouched as out of scope for
   this checkpoint, but it is a real, pre-existing gap between documented and
   actual behavior.
+- `--backend api` is present and code-complete (schema-constrained hosted
+  fallback via `claude-haiku-4-5`, gated behind `--allow-external`) but
+  **untested this session**: the old key from a prior session was confirmed
+  absent from this environment (unset, not in any shell rc file or `.env`),
+  and no fresh key was supplied to test a live call against it before
+  submission. Do not read the earlier checkpoints' recorded `--backend api`
+  runs as proof this session's code path was re-verified live — it wasn't.
+  `--backend local` is what was demonstrated today.
 - **Found while auditing this submission, from a session predating today's
   work:** the `last-prompt` preview field of two earlier checkpoints
   (`01M1TNGEWC61CPW6SRDVFBJXMM`, `01M1TQ54CDJMHNHTPCR34RVHDY`) contains an
