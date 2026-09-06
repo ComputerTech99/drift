@@ -1,0 +1,97 @@
+{
+  "cli_version": "0.10.5",
+  "checkpoint_id": "01M1TQ54CDJMHNHTPCR34RVHDY",
+  "session_id": "78dae017-6716-4b47-9f3d-9794d285fe00",
+  "strategy": "manual-commit",
+  "created_at": "2026-09-06T06:40:38.873885Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "save_step_count": 1,
+  "files_touched": [
+    "drift.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-5",
+  "turn_id": "ca78972c5b5a",
+  "checkpoint_transcript_start": 1033,
+  "transcript_lines_at_start": 1033,
+  "compact_transcript_start": 206,
+  "token_usage": {
+    "input_tokens": 286,
+    "cache_creation_tokens": 203780,
+    "cache_read_tokens": 54716426,
+    "output_tokens": 98491,
+    "api_call_count": 143
+  },
+  "skill_events_version": 1,
+  "skill_events": [
+    {
+      "id": "claude-skill-toolu_01M7FXtx8LPb9ezMAYXqLzAp",
+      "event_type": "tool_invocation",
+      "skill": {
+        "name": "claude-api"
+      },
+      "source": {
+        "agent": "claude-code",
+        "signal": "skill_tool_use",
+        "confidence": "explicit"
+      },
+      "turn_id": "41cad8d585c7",
+      "transcript_anchor": {
+        "unit": "line",
+        "start": 267,
+        "end": 268,
+        "entry_ids": [
+          "12ba3bd7-520c-479c-b4a8-e569c15351b8"
+        ],
+        "tool_use_id": "toolu_01M7FXtx8LPb9ezMAYXqLzAp"
+      },
+      "native": {
+        "tool_name": "Skill",
+        "tool_use_id": "toolu_01M7FXtx8LPb9ezMAYXqLzAp"
+      },
+      "collapse": {
+        "target": "tool_pair",
+        "label": "Skill: claude-api",
+        "default_collapsed": true
+      }
+    }
+  ],
+  "session_metrics": {
+    "turn_count": 20
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-09-06T06:40:38.703193Z",
+    "agent_lines": 0,
+    "agent_removed": 16,
+    "human_added": 4,
+    "human_modified": 192,
+    "human_removed": 0,
+    "total_committed": 47,
+    "total_lines_changed": 212,
+    "agent_percentage": 7.547169811320755,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 98,
+      "user_lines_removed": 96,
+      "agent_lines_added": 141,
+      "agent_lines_removed": 112,
+      "user_added_per_file": {
+        "drift.py": 98
+      },
+      "user_removed_per_file": {
+        "drift.py": 96
+      }
+    }
+  ]
+}

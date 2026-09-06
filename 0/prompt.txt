@@ -1,0 +1,21 @@
+Stop. Stage 3's output is not the design working correctly — it's an extraction failure with an honest graph layer underneath. Do not proceed to Stage 4 until this is fixed, because dropped will scan for symbols like format_table that never existed and produce the same class of garbage.
+
+Answer this first, plainly: print the raw content-block count next to the 371 turn count. I have asked twice. If they're equal, the grouping never landed.
+
+Two extraction defects to fix:
+
+1. Background prose is being extracted as requirements. "Capture agent sessions as Checkpoints stored in Git", "Stream session as JSONL", "Emit deterministic tree-sitter graph" — these describe what entire already does. They were never requests. Add to the extraction prompt: extract only things the user asked to be built or changed. Descriptions of existing tools, background context, and rationale are not requirements. If a sentence describes something that already exists rather than something to be made, skip it entirely.
+
+2. unverifiable is being avoided. One deferral out of sixteen is wrong. "One LLM call in the entire program" and "Single file, drift.py" are process and file-layout constraints, not structural facts about symbols. Neither fits the five types. Both were forced into assertions that cannot pass.
+
+Add explicit guidance with examples: a requirement about how many of something exist, about file names or layout, about performance, or about process, returns unverifiable. Only map to an assertion when the requirement names a code entity whose presence, reachability, call relationship, test coverage, or literal content can be checked. When in doubt, return unverifiable — an admitted gap is correct, a forced assertion is a bug.
+
+Then re-run against the same checkpoint and show me the new table. I expect far fewer rows, a meaningful number of unverified, and absent reserved for things actually requested and actually missing.
+
+Then build the demo fixture, before Stage 4. A small Python repo, real multi-turn session, opening prompt asking for: an HTTP client with retry, exponential backoff, a cap of five attempts, logging on every retry, a timeout, and a test. Work it eight to ten turns with a genuine refactor partway. This is the primary demo target — the tool is built for feature requests, not for design documents, and this checkpoint is the adversarial case.
+
+Stage 4 runs against that fixture.
+
+---
+
+first commit this https://entire.io/gh/ComputerTech99/drift/commits commit here this repository
