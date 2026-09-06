@@ -1,0 +1,12 @@
+Captured 2026-09-06T13:48:05.152100
+Real drift.py evaluator code (build_graph_index, ASSERTION_HANDLERS) run against a
+real `entire graph snapshot` of a recreated fixture (byte-identical content to the
+original demo-repo, which was deleted during cleanup). extract_requirements was NOT
+called - these three assertions are hand-supplied to isolate and demonstrate the
+deterministic verification layer, independent of the (unreliable, see Known
+Limitations) local extraction step.
+
+requirement                                                   verdict     evidence_class        evidence
+add call_with_retry                                           landed      confirmed_structural  regex search for /call_with_retry/ in symbol names: match
+the HttpClient is tested                                      landed      heuristic             inbound edge from a test-path file to 'HttpClient.get': found
+add a request timeout (mistargeted, as the buggy extraction…  absent      confirmed_structural  regex search for /timeout/ in symbol names: no match
