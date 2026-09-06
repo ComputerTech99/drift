@@ -1,0 +1,174 @@
+=== 1b. entire graph impact: curveball (privacy-boundary) change ===
+NOTE: this re-runs and persists the same impact analysis that was originally run
+and reported BEFORE any edit in this checkpoint (see ordering verification above);
+it was not saved to a file at the time, so it is captured here now, post-hoc, against
+the current (post-edit) code for the record.
+
+########## impact: extract_requirements ##########
+Index: cache-miss (164ms) | Query: 1ms | Total: 166ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: extract_requirements (drift.py:80) def=80 span=80-88 [function]
+Blast radius: 5 callers (2 direct, 3 transitive), 3 callees, 0 type consumers, 3 data flows, 1 co-change file, 0 siblings.
+Callers (2 direct, 3 transitive; who breaks if behavior changes):
+- main (drift.py:363, def :337)
+- TestBackendGating.test_local_backend_only_ever_contacts_localhost (test_drift.py:132, def :129)
+- drift.py (drift.py) [via main]
+- TestBackendGating.test_api_without_allow_external_exits_before_any_call (test_drift.py:124, def :120) [via main]
+- TestMainEndToEnd._run_main (test_drift.py:147, def :137) [via main]
+Callees (3; what it depends on):
+- _extract_local (drift.py:90)
+- _extract_api (drift.py:104)
+- _close_assertion_enum (drift.py:126)
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (1 in, 2 out):
+- -> _extract_local (drift.py:90)
+- -> _extract_api (drift.py:104)
+- <- _close_assertion_enum (drift.py:126)
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
+########## impact: _extract_local ##########
+Index: cache-miss (152ms) | Query: 0ms | Total: 153ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: _extract_local (drift.py:90) def=90 span=90-102 [function]
+Blast radius: 3 callers (1 direct, 2 transitive), 2 callees, 0 type consumers, 1 data flow, 1 co-change file, 0 siblings.
+Callers (1 direct, 2 transitive; who breaks if behavior changes):
+- extract_requirements (drift.py:83, def :80)
+- main (drift.py:363, def :337) [via extract_requirements]
+- TestBackendGating.test_local_backend_only_ever_contacts_localhost (test_drift.py:132, def :129) [via extract_requirements]
+Callees (2; what it depends on):
+- json.loads
+- requests.post
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (1 in, 0 out):
+- <- extract_requirements (drift.py:80)
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
+########## impact: _extract_api ##########
+Index: cache-miss (165ms) | Query: 0ms | Total: 165ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: _extract_api (drift.py:104) def=104 span=104-124 [function]
+Blast radius: 3 callers (1 direct, 2 transitive), 3 callees, 0 type consumers, 1 data flow, 1 co-change file, 0 siblings.
+Callers (1 direct, 2 transitive; who breaks if behavior changes):
+- extract_requirements (drift.py:85, def :80)
+- main (drift.py:363, def :337) [via extract_requirements]
+- TestBackendGating.test_local_backend_only_ever_contacts_localhost (test_drift.py:132, def :129) [via extract_requirements]
+Callees (3; what it depends on):
+- json.loads
+- os.environ.get
+- requests.post
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (1 in, 0 out):
+- <- extract_requirements (drift.py:80)
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
+########## impact: parse_transcript ##########
+Index: cache-miss (142ms) | Query: 0ms | Total: 142ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: parse_transcript (drift.py:141) def=141 span=141-192 [function]
+Blast radius: 8 callers (5 direct, 3 transitive), 1 callee, 0 type consumers, 0 data flows, 1 co-change file, 0 siblings.
+Callers (5 direct, 3 transitive; who breaks if behavior changes):
+- main (drift.py:353, def :337)
+- TestParseTranscript.test_complete_groups_turns (test_drift.py:57, def :56)
+- TestParseTranscript.test_redacted_fields_degrade_not_crash (test_drift.py:64, def :63)
+- TestParseTranscript.test_missing_and_malformed_lines_do_not_crash (test_drift.py:72, def :69)
+- TestFindDroppedTurn.test_redacted_tool_input_does_not_crash (test_drift.py:90, def :89)
+- drift.py (drift.py) [via main]
+- TestBackendGating.test_api_without_allow_external_exits_before_any_call (test_drift.py:124, def :120) [via main]
+- TestMainEndToEnd._run_main (test_drift.py:147, def :137) [via main]
+Callees (1; what it depends on):
+- json.loads
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (0 in, 0 out):
+- none
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
+########## impact: build_graph_index ##########
+Index: cache-miss (137ms) | Query: 0ms | Total: 137ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: build_graph_index (drift.py:195) def=195 span=195-216 [function]
+Blast radius: 7 callers (4 direct, 3 transitive), 1 callee, 0 type consumers, 0 data flows, 1 co-change file, 0 siblings.
+Callers (4 direct, 3 transitive; who breaks if behavior changes):
+- main (drift.py:356, def :337)
+- TestBuildGraphIndex.test_complete_graph (test_drift.py:79, def :78)
+- TestBuildGraphIndex.test_partial_graph_does_not_crash_and_keeps_usable_symbols (test_drift.py:84, def :83)
+- TestEvalLiteralInBody.test_missing_file_returns_false_not_crash (test_drift.py:96, def :95)
+- drift.py (drift.py) [via main]
+- TestBackendGating.test_api_without_allow_external_exits_before_any_call (test_drift.py:124, def :120) [via main]
+- TestMainEndToEnd._run_main (test_drift.py:147, def :137) [via main]
+Callees (1; what it depends on):
+- json.loads
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (0 in, 0 out):
+- none
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
+########## impact: main ##########
+Index: cache-miss (178ms) | Query: 0ms | Total: 178ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: main (drift.py:337) def=337 span=337-395 [function]
+Blast radius: 5 callers (3 direct, 2 transitive), 7 callees, 0 type consumers, 0 data flows, 1 co-change file, 0 siblings.
+Callers (3 direct, 2 transitive; who breaks if behavior changes):
+- drift.py (drift.py)
+- TestBackendGating.test_api_without_allow_external_exits_before_any_call (test_drift.py:124, def :120)
+- TestMainEndToEnd._run_main (test_drift.py:147, def :137)
+- TestMainEndToEnd.test_complete_input_surfaces_all_tiers (test_drift.py:159, def :153) [via TestMainEndToEnd._run_main]
+- TestMainEndToEnd.test_redacted_and_missing_fields_yield_partial_not_crashed_report (test_drift.py:170, def :167) [via TestMainEndToEnd._run_main]
+Callees (7; what it depends on):
+- argparse.ArgumentParser
+- sys.exit
+- extract_requirements (drift.py:80)
+- run_entire (drift.py:136)
+- parse_transcript (drift.py:141)
+- build_graph_index (drift.py:195)
+- find_dropped_turn (drift.py:317)
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (0 in, 0 out):
+- none
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
+########## impact: find_dropped_turn ##########
+Index: cache-miss (140ms) | Query: 0ms | Total: 141ms
+Completeness: no parse failures in Python (2 files parsed); 1 elsewhere (JSON 1) cannot affect this answer — see --format json.
+Impact: find_dropped_turn (drift.py:317) def=317 span=317-334 [function]
+Blast radius: 5 callers (2 direct, 3 transitive), 1 callee, 0 type consumers, 0 data flows, 1 co-change file, 0 siblings.
+Callers (2 direct, 3 transitive; who breaks if behavior changes):
+- main (drift.py:378, def :337)
+- TestFindDroppedTurn.test_redacted_tool_input_does_not_crash (test_drift.py:91, def :89)
+- drift.py (drift.py) [via main]
+- TestBackendGating.test_api_without_allow_external_exits_before_any_call (test_drift.py:124, def :120) [via main]
+- TestMainEndToEnd._run_main (test_drift.py:147, def :137) [via main]
+Callees (1; what it depends on):
+- _compile (drift.py:218)
+Type consumers (0 in, 0 out; USES_TYPE/PARAM_TYPE/RETURNS_TYPE):
+- none
+Data flows (0 in, 0 out):
+- none
+Co-change coupling (1; files that historically change with drift.py):
+- CLAUDE.md [files changed together in 3 recent commits]
+Same-container siblings (0):
+- none
+
