@@ -1,7 +1,9 @@
 Captured 2026-09-06T13:48:05.152100
 Real drift.py evaluator code (build_graph_index, ASSERTION_HANDLERS) run against a
-real `entire graph snapshot` of a recreated fixture (byte-identical content to the
-original demo-repo, which was deleted during cleanup). extract_requirements was NOT
+real `entire graph snapshot` of a fixture recreated from the same specification as
+the original demo-repo (which was deleted during cleanup before this capture was
+made - not verified byte-identical, since the original no longer existed to diff
+against). extract_requirements was NOT
 called - these three assertions are hand-supplied to isolate and demonstrate the
 deterministic verification layer, independent of the (unreliable, see Known
 Limitations) local extraction step.
